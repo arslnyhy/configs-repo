@@ -1,8 +1,8 @@
 Building configuration...
 
-Current configuration : 7618 bytes
+Current configuration : 7717 bytes
 !
-! Last configuration change at 15:07:26 UTC Wed Feb 12 2025 by admin
+! Last configuration change at 15:23:01 UTC Wed Feb 12 2025 by admin
 !
 version 17.12
 service timestamps debug datetime msec
@@ -159,6 +159,7 @@ redundancy
 !
 !
 interface Loopback0
+ description Primary Loopback Interface
  ip address 5.5.5.5 255.255.255.255
 !
 interface Loopback1
@@ -192,6 +193,9 @@ interface GigabitEthernet3
  ip vrf forwarding ExperimentalVRF
  ip address 192.0.2.1 255.255.255.0
  negotiation auto
+!
+interface Vlan101
+ ip address 192.168.10.1 255.255.255.0
 !
 router ospf 19
  router-id 33.44.88.22
