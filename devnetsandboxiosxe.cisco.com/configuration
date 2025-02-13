@@ -1,8 +1,8 @@
 Building configuration...
 
-Current configuration : 7717 bytes
+Current configuration : 7115 bytes
 !
-! Last configuration change at 15:23:01 UTC Wed Feb 12 2025 by admin
+! Last configuration change at 15:05:35 UTC Thu Feb 13 2025 by admin
 !
 version 17.12
 service timestamps debug datetime msec
@@ -20,12 +20,6 @@ boot system bootflash:packages.conf
 boot-end-marker
 !
 !
-vrf definition management
- description OOB Management VRF
- rd 1:100
-!
-vrf definition test
-!
 no logging console
 aaa new-model
 !
@@ -40,9 +34,6 @@ aaa session-id common
 !
 !
 !
-!
-ip vrf ExperimentalVRF
- rd 6:350
 !
 !
 !
@@ -144,10 +135,8 @@ diagnostic bootup level minimal
 !
 !
 !
-enable password cisco
 !
 username admin privilege 15 secret 9 $9$lgJxy7Ga.Th5FU$gocFhcHC/8pvixGr.s2wB7X59FiGVvwYawfCPrmaJuY
-username test privilege 0 password 0 test
 !
 redundancy
 !
@@ -159,54 +148,34 @@ redundancy
 !
 !
 interface Loopback0
- description Primary Loopback Interface
- ip address 5.5.5.5 255.255.255.255
-!
-interface Loopback1
- ip address 10.10.10.10 255.255.255.255
-!
-interface Loopback2
- ip address 20.20.20.20 255.255.255.255
+ ip address 10.0.0.1 255.255.255.0
 !
 interface Loopback10
  no ip address
 !
-interface Loopback123
- ip address 123.123.123.123 255.255.255.255
+interface Loopback2222
+ description RESTCONF Test
+ ip address 192.168.22.22 255.255.255.255
 !
 interface VirtualPortGroup0
  ip address 192.168.1.1 255.255.255.0
  ip nat inside
 !
 interface GigabitEthernet1
- description Scripy2_Byaron. 5-2-2025
+ description MANAGEMENT INTERFACE - DON'T TOUCH ME
  ip address 10.10.20.48 255.255.255.0
  negotiation auto
 !
 interface GigabitEthernet2
- description configured via SSH
- ip address 1.2.2.3 255.255.255.240
+ description This was Automated
+ ip address 10.1.1.1 255.255.255.0
  negotiation auto
 !
 interface GigabitEthernet3
- description configured via SSH
- ip vrf forwarding ExperimentalVRF
- ip address 192.0.2.1 255.255.255.0
+ description Network Interface
+ no ip address
+ shutdown
  negotiation auto
-!
-interface Vlan101
- ip address 192.168.10.1 255.255.255.0
-!
-router ospf 19
- router-id 33.44.88.22
-!
-router bgp 100
- bgp log-neighbor-changes
- !
- address-family ipv4 vrf ExperimentalVRF
-  neighbor 192.0.2.9 remote-as 200
-  neighbor 192.0.2.9 activate
- exit-address-family
 !
 iox
 ip forward-protocol nd
@@ -215,7 +184,6 @@ ip http server
 ip http authentication local
 ip http secure-server
 ip route 0.0.0.0 0.0.0.0 GigabitEthernet1 10.10.20.254
-ip route vrf ExperimentalVRF 192.0.2.0 255.255.255.0 192.0.2.4
 ip nat inside source list NAT-ACL interface GigabitEthernet1 overload
 ip ssh bulk-mode 131072
 ip ssh rsa keypair-name ssh-key
@@ -260,6 +228,9 @@ call-home
  profile "CiscoTAC-1"
   active
   destination transport-method http
+ntp server 10.20.30.40 version 2
+ntp server 10.10.10.10 version 2
+ntp server 10.168.1.2 version 2
 !
 !
 !
