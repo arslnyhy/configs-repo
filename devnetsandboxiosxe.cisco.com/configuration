@@ -1,12 +1,12 @@
 Building configuration...
 
-Current configuration : 7115 bytes
+Current configuration : 8037 bytes
 !
-! Last configuration change at 15:05:35 UTC Thu Feb 13 2025 by admin
+! Last configuration change at 09:59:34 UTC Fri Feb 14 2025 by admin
 !
 version 17.12
 service timestamps debug datetime msec
-service timestamps log datetime msec
+service timestamps log datetime localtime
 service call-home
 platform qfp utilization monitor load 80
 platform punt-keepalive disable-kernel-core
@@ -20,6 +20,7 @@ boot system bootflash:packages.conf
 boot-end-marker
 !
 !
+logging userinfo
 no logging console
 aaa new-model
 !
@@ -46,6 +47,8 @@ ip domain name cisco.com
 !
 !
 !
+login block-for 900 attempts 3 within 120
+login on-failure log
 login on-success log
 !
 !
@@ -130,6 +133,9 @@ crypto pki certificate chain SLA-TrustPoint
 !
 !
 license udi pid C8000V sn 9OBXJHNNU5V
+archive
+ log config
+  logging enable
 memory free low-watermark processor 63709
 diagnostic bootup level minimal
 !
@@ -141,6 +147,7 @@ username admin privilege 15 secret 9 $9$lgJxy7Ga.Th5FU$gocFhcHC/8pvixGr.s2wB7X59
 redundancy
 !
 !
+cdp run
 !
 !
 !
@@ -152,6 +159,20 @@ interface Loopback0
 !
 interface Loopback10
  no ip address
+!
+interface Loopback67
+ ip address 200.10.10.1 255.255.255.254
+!
+interface Loopback100
+ description "Don't forget to bring a towel"
+ bandwidth receive 1024
+ ip address 192.88.102.1 255.255.255.0 secondary
+ ip address 192.168.209.1 255.255.255.0 secondary
+ ip address 192.88.209.209 255.255.255.0
+ shutdown
+!
+interface Loopback321
+ ip address 10.3.2.1 255.255.255.255
 !
 interface Loopback2222
  description RESTCONF Test
@@ -168,14 +189,16 @@ interface GigabitEthernet1
 !
 interface GigabitEthernet2
  description This was Automated
- ip address 10.1.1.1 255.255.255.0
+ ip address 192.168.7.1 255.255.255.0
  negotiation auto
 !
 interface GigabitEthernet3
  description Network Interface
- no ip address
- shutdown
+ ip address 172.168.1.1 255.255.255.0
  negotiation auto
+!
+router ospf 1
+ network 0.0.0.0 255.255.255.255 area 0
 !
 iox
 ip forward-protocol nd
@@ -183,12 +206,16 @@ ip forward-protocol nd
 ip http server
 ip http authentication local
 ip http secure-server
+ip http max-connections 2
 ip route 0.0.0.0 0.0.0.0 GigabitEthernet1 10.10.20.254
 ip nat inside source list NAT-ACL interface GigabitEthernet1 overload
 ip ssh bulk-mode 131072
 ip ssh rsa keypair-name ssh-key
 ip scp server enable
 !
+!
+ip prefix-list 10 description testing
+ip prefix-list 10 seq 20 deny 1.0.0.0/8 ge 20 le 21
 !
 ip access-list extended NAT-ACL
  10 permit ip 192.168.1.0 0.0.0.255 any
@@ -201,6 +228,9 @@ ip access-list extended Test
 !
 control-plane
 !
+banner login ^C
+        WELCOME TO DOG HOUSE...
+^C
 banner motd ^C
 Welcome to the DevNet Sandbox for Cat8000V and IOS XE
 
@@ -218,6 +248,7 @@ line con 0
 line aux 0
 line vty 0 4
  exec-timeout 0 0
+ session-limit 2
  length 0
  transport input ssh
 !
@@ -228,9 +259,14 @@ call-home
  profile "CiscoTAC-1"
   active
   destination transport-method http
+ntp logging
+ntp authenticate
+ntp source GigabitEthernet1
 ntp server 10.20.30.40 version 2
 ntp server 10.10.10.10 version 2
 ntp server 10.168.1.2 version 2
+ntp peer 172.16.1.10 source GigabitEthernet1 version 2
+ntp server 172.16.1.12 source GigabitEthernet1 version 2
 !
 !
 !
